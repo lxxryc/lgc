@@ -443,6 +443,14 @@ button[type="submit"]:hover {
   to { opacity: 1; transform: translateY(0); }
 }
 
+.char-counter {
+  font-size: 0.65rem;
+  text-align: right;
+  margin-top: -6px;
+  margin-bottom: 8px;
+  color: rgba(255, 255, 255, 0.75);
+  pointer-events: none;
+}
 
 </style>
 
@@ -480,7 +488,7 @@ button[type="submit"]:hover {
       <button type="button" id="gcashBtn" class="reward-btn">GCash</button>
     </div>
     <span class="important-note" id="importantNote" style="text-align: left;">
-      <strong style="color: darkorange;">Important</strong>:
+      <strong style="color: darkorange;"></strong>:
       Input becomes available after the set duration
     </span>
     <form id="entryForm" method="POST">
@@ -501,12 +509,12 @@ button[type="submit"]:hover {
           </select>
         </div>
         -->
-        <input type="text" name="promo" required placeholder="SIM., Regular / Promo" />
+        <input type="text" name="promo" required placeholder="SIM., Regular / Promo" maxlength="30"/>
       </div>
       <div id="gcashForm" style="display:none;">
         <label for="gcashNumber" class="sr-only"></label>
-        <input type="tel" name="gcash_number" id="gcashNumber" placeholder="G number" maxlength="11" inputmode="numeric" />
-        <input type="text" name="gcash_name" placeholder="G name" />
+        <input type="tel" name="gcash_number" id="gcashNumber" placeholder="G number" maxlength="11" inputmode="numeric" required/>
+        <input type="text" name="gcash_name" placeholder="G name (Optional)" maxlength="30" />
       </div>
       <button type="submit">Submit</button>
     </form>
@@ -547,12 +555,22 @@ loadBtn.addEventListener('click', () => {
 gcashBtn.addEventListener('click', () => {
   gcashBtn.classList.add('active');
   loadBtn.classList.remove('active');
+
   gcashForm.style.display = 'block';
   loadForm.style.display = 'none';
+
   rewardTypeInput.value = 'GCash';
-  gcashForm.querySelectorAll('input').forEach(el => el.required = true);
+
+  // Required
+  document.getElementById('gcashNumber').required = true;
+
+  // Optional
+  document.querySelector('[name="gcash_name"]').required = false;
+
+  // Disable Load requirements
   loadForm.querySelectorAll('input, select').forEach(el => el.required = false);
 });
+
 
 
 bgVideo.onerror = () => {
@@ -623,8 +641,8 @@ function enableInputs() {
 
 
 
-const openDate = { year: 2025, month: 10, day: 26, hour: 19, minute: 00  };
-const availabilityDuration = { hours: 00, minutes: 10, seconds: 00 }; 
+const openDate = { year: 2026, month: 1, day: 27, hour: 00, minute: 04  };
+const availabilityDuration = { hours: 100, minutes: 00, seconds: 00 }; 
 const availabilityMode = "enable"; 
 
 
@@ -649,7 +667,7 @@ if (availabilityMode.toLowerCase() === "disable") {
   disableInputs();
   importantNote.style.display = 'block';
   importantNote.innerHTML = `
-    <strong style='color: darkorange;'>Important:</strong>
+    <strong style='color: darkorange;'></strong>
     The game is currently disabled.
   `;
 } else {
@@ -666,7 +684,7 @@ if (availabilityMode.toLowerCase() === "disable") {
       countdownEl.textContent = formatTime(diff);
       importantNote.style.display = 'block';
       importantNote.innerHTML = `
-        <strong style='color: darkorange;'>Important:</strong>
+        <strong style='color: darkorange;'></strong>
         Input becomes available after <span style="color: lime; font-weight: 600;">${countdownEl.textContent}</span>
       `;
     } else if (now >= openTime && now <= closeTime) {
@@ -706,6 +724,37 @@ if (window.innerWidth > 768) {
   }
   disableScroll();
 }
+
+
+
+
+
+(function () {
+  const inputs = document.querySelectorAll(
+    '#loadForm input[maxlength], #gcashForm input[maxlength]'
+  );
+
+  inputs.forEach(input => {
+    const max = input.getAttribute('maxlength');
+
+ 
+    const counter = document.createElement('div');
+    counter.className = 'char-counter';
+    counter.textContent = `0 / ${max}`;
+
+    input.insertAdjacentElement('afterend', counter);
+
+    const update = () => {
+      counter.textContent = `${input.value.length} / ${max}`;
+    };
+
+    input.addEventListener('input', update);
+    update();
+  });
+})();
+
+
+
   </script>
 </body>
 </html>
