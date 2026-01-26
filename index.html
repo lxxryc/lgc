@@ -273,13 +273,6 @@ button[type="submit"] span {
     0 0 15px rgba(255, 255, 255, 0.3);
 }
 
-button[type="submit"]:hover {
-  transform: scale(1.03);
-  box-shadow:
-    0 6px 25px rgba(0, 0, 0, 0.5),
-    0 0 35px rgba(255, 255, 0, 0.5),
-    0 0 50px rgba(0, 204, 153, 0.4);
-}
 
 
 /*submit*/
@@ -293,11 +286,6 @@ button[type="submit"]:active {
 }
 
 
-button[type="submit"]:hover {
-  background: linear-gradient(90deg, #00cc99, #0055aa);
-  color: #fff;
-  box-shadow: 0 0 15px #00ffc6;
-}
 
 .result-link {
   color: white;
@@ -451,6 +439,12 @@ button[type="submit"]:hover {
   color: rgba(255, 255, 255, 0.75);
   pointer-events: none;
 }
+
+
+
+
+
+
 
 </style>
 
@@ -641,8 +635,8 @@ function enableInputs() {
 
 
 
-const openDate = { year: 2026, month: 1, day: 27, hour: 00, minute: 04  };
-const availabilityDuration = { hours: 100, minutes: 00, seconds: 00 }; 
+const openDate = { year: 2026, month: 1, day: 27, hour: 00, minute: 00  };
+const availabilityDuration = { hours: 01, minutes: 00, seconds: 00 }; 
 const availabilityMode = "enable"; 
 
 
@@ -694,7 +688,7 @@ if (availabilityMode.toLowerCase() === "disable") {
       countdownEl.textContent = `Available — ${formatTime(diff)}`;
       importantNote.style.display = 'block';
       importantNote.innerHTML = `
-        Input is now <span style="color: lime; font-weight: 600;">available</span> —
+        Input is available <span style="color: lime; font-weight: 600;"></span> 
         <span style="color: lime;">${formatTime(diff)}</span> remaining.
       `;
     } else {
@@ -702,7 +696,7 @@ if (availabilityMode.toLowerCase() === "disable") {
       countdownEl.textContent = "Closed.";
       importantNote.style.display = 'block';
       importantNote.innerHTML = `
-        <strong style='color: darkorange;'>Important:</strong>
+        <strong style='color: darkorange;'></strong>
         Input is currently closed. Stay tuned for what’s next.
       `;
     }
@@ -753,6 +747,42 @@ if (window.innerWidth > 768) {
   });
 })();
 
+
+
+
+(function () {
+  const submitBtn = document.querySelector(
+    '#entryForm button[type="submit"]'
+  );
+
+  function lockSubmit() {
+    submitBtn.disabled = true;
+    submitBtn.classList.add('submit-locked');
+  }
+
+  function unlockSubmit() {
+    submitBtn.disabled = false;
+    submitBtn.classList.remove('submit-locked');
+  }
+
+  function syncSubmitState() {
+    const locked = [...document.querySelectorAll(
+      '#entryForm input, #entryForm select'
+    )].some(el => el.disabled || el.readOnly);
+
+    locked ? lockSubmit() : unlockSubmit();
+  }
+
+  const observer = new MutationObserver(syncSubmitState);
+
+  document.querySelectorAll('#entryForm input, #entryForm select')
+    .forEach(el => observer.observe(el, {
+      attributes: true,
+      attributeFilter: ['disabled', 'readonly']
+    }));
+
+  syncSubmitState();
+})();
 
 
   </script>
