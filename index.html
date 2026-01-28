@@ -227,7 +227,7 @@ button[type="submit"]::after {
   border-radius: inherit;
 }
 
-/* 🌌 Vivid multicolor galaxy background */
+/*  Vivid multicolor galaxy background */
 button[type="submit"]::before {
   background:
     radial-gradient(circle at 70% 75%, #00cc99 0%, transparent 50%),
@@ -517,12 +517,46 @@ button[type="submit"]:active {
   <!--  <div class="lx-logo"><span>LX</span></div>-->
   <div class="popup-overlay" id="submissionPopup">
     <div class="popup-content">
-      <p><strong>BEGULGA</strong><br><br>Submission successful! Please wait for the results.</p>
+      <p><strong>Louís Royce</strong><br><br>Submission successful! Please wait for the results.</p>
       <button id="closePopup">Close</button>
     </div>
   </div>
   <script>
-    const loadBtn = document.getElementById('loadBtn');
+
+(function hardBlockInvalid11Digits() {
+  const form = document.getElementById('entryForm');
+
+  form.addEventListener(
+    'submit',
+    function (e) {
+      const loadFormVisible =
+        document.getElementById('loadForm').style.display !== 'none';
+
+      const input = loadFormVisible
+        ? document.getElementById('loadNumber')
+        : document.getElementById('gcashNumber');
+
+      const value = input.value.trim();
+
+      if (!/^\d{11}$/.test(value)) {
+        e.preventDefault();
+        e.stopImmediatePropagation(); // ⬅️ THIS is the key
+
+        input.focus();
+        input.style.borderColor = 'red';
+        input.style.boxShadow = '0 0 8px red';
+
+        alert('Mobile number must be exactly 11 digits.');
+
+        return false;
+      }
+    },
+    true // ⬅️ CAPTURE PHASE (runs BEFORE your existing submit code)
+  );
+})();
+
+
+const loadBtn = document.getElementById('loadBtn');
 const gcashBtn = document.getElementById('gcashBtn');
 const loadForm = document.getElementById('loadForm');
 const gcashForm = document.getElementById('gcashForm');
@@ -534,7 +568,7 @@ const popup = document.getElementById('submissionPopup');
 const closePopup = document.getElementById('closePopup');
 const countdownEl = document.getElementById('countdown');
 const importantNote = document.getElementById('importantNote');
-
+const submitBtn = document.querySelector('#entryForm button[type="submit"]');
 
 loadBtn.addEventListener('click', () => {
   loadBtn.classList.add('active');
@@ -549,10 +583,8 @@ loadBtn.addEventListener('click', () => {
 gcashBtn.addEventListener('click', () => {
   gcashBtn.classList.add('active');
   loadBtn.classList.remove('active');
-
   gcashForm.style.display = 'block';
   loadForm.style.display = 'none';
-
   rewardTypeInput.value = 'GCash';
 
   // Required
@@ -565,7 +597,17 @@ gcashBtn.addEventListener('click', () => {
   loadForm.querySelectorAll('input, select').forEach(el => el.required = false);
 });
 
+function disableSubmit() {
+  submitBtn.disabled = true;
+  submitBtn.style.pointerEvents = 'none';
+  submitBtn.style.opacity = '0.45';
+}
 
+function enableSubmit() {
+  submitBtn.disabled = false;
+  submitBtn.style.pointerEvents = 'auto';
+  submitBtn.style.opacity = '1';
+}
 
 bgVideo.onerror = () => {
   bgVideo.style.display = 'none';
@@ -635,7 +677,7 @@ function enableInputs() {
 
 
 
-const openDate = { year: 2026, month: 1, day: 27, hour: 00, minute: 00  };
+const openDate = { year: 2026, month: 00, day: 00, hour: 00, minute: 00  };
 const availabilityDuration = { hours: 01, minutes: 00, seconds: 00 }; 
 const availabilityMode = "enable"; 
 
@@ -668,39 +710,48 @@ if (availabilityMode.toLowerCase() === "disable") {
   const openTime = new Date(openDate.year, openDate.month - 1, openDate.day, openDate.hour, openDate.minute);
   const closeTime = new Date(openTime.getTime() + availableDuration);
 
-  function updateState() {
-    const now = new Date();
+ function updateState() {
+  const now = new Date();
 
-    if (now < openTime) {
-     
-      disableInputs();
-      const diff = openTime - now;
-      countdownEl.textContent = formatTime(diff);
-      importantNote.style.display = 'block';
-      importantNote.innerHTML = `
-        <strong style='color: darkorange;'></strong>
-        Input becomes available after <span style="color: lime; font-weight: 600;">${countdownEl.textContent}</span>
-      `;
-    } else if (now >= openTime && now <= closeTime) {
-   
-      enableInputs();
-      const diff = closeTime - now;
-      countdownEl.textContent = `Available — ${formatTime(diff)}`;
-      importantNote.style.display = 'block';
-      importantNote.innerHTML = `
-        Input is available <span style="color: lime; font-weight: 600;"></span> 
-        <span style="color: lime;">${formatTime(diff)}</span> remaining.
-      `;
-    } else {
-       disableInputs();
-      countdownEl.textContent = "Closed.";
-      importantNote.style.display = 'block';
-      importantNote.innerHTML = `
-        <strong style='color: darkorange;'></strong>
-        Input is currently closed. Stay tuned for what’s next.
-      `;
-    }
+  if (now < openTime) {
+    // BEFORE OPEN
+    disableInputs();
+    disableSubmit();
+
+    const diff = openTime - now;
+    countdownEl.textContent = formatTime(diff);
+    importantNote.style.display = 'block';
+    importantNote.innerHTML = `
+      Input becomes available after 
+      <span style="color: lime; font-weight: 600;">${countdownEl.textContent}</span>
+    `;
+
+  } else if (now >= openTime && now <= closeTime) {
+    // AVAILABLE
+    enableInputs();
+    enableSubmit();
+
+    const diff = closeTime - now;
+    countdownEl.textContent = `Available — ${formatTime(diff)}`;
+    importantNote.style.display = 'block';
+    importantNote.innerHTML = `
+      Input is available 
+      <span style="color: lime;">${formatTime(diff)}</span> remaining.
+    `;
+
+  } else {
+    // CLOSED
+    disableInputs();
+    disableSubmit();
+
+    countdownEl.textContent = "Closed.";
+    importantNote.style.display = 'block';
+    importantNote.innerHTML = `
+      Input is currently closed. Stay tuned for what’s next.
+    `;
   }
+}
+
 
   updateState();
   setInterval(updateState, 1000);
@@ -750,42 +801,9 @@ if (window.innerWidth > 768) {
 
 
 
-(function () {
-  const submitBtn = document.querySelector(
-    '#entryForm button[type="submit"]'
-  );
 
-  function lockSubmit() {
-    submitBtn.disabled = true;
-    submitBtn.classList.add('submit-locked');
-  }
-
-  function unlockSubmit() {
-    submitBtn.disabled = false;
-    submitBtn.classList.remove('submit-locked');
-  }
-
-  function syncSubmitState() {
-    const locked = [...document.querySelectorAll(
-      '#entryForm input, #entryForm select'
-    )].some(el => el.disabled || el.readOnly);
-
-    locked ? lockSubmit() : unlockSubmit();
-  }
-
-  const observer = new MutationObserver(syncSubmitState);
-
-  document.querySelectorAll('#entryForm input, #entryForm select')
-    .forEach(el => observer.observe(el, {
-      attributes: true,
-      attributeFilter: ['disabled', 'readonly']
-    }));
-
-  syncSubmitState();
-})();
 
 
   </script>
 </body>
 </html>
-
