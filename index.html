@@ -450,6 +450,26 @@ button[type="submit"]:active {
 
 
 
+.result-link,
+.result-link:visited {
+  color: #fff;                 /* keep white, no blue */
+  text-decoration: underline;  /* underline always */
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.result-link:hover {
+  opacity: 0.85;               /* subtle hover feedback */
+}
+
+.result-link:active {
+  opacity: 0.6;                /* very minimal click indication */
+  text-decoration-thickness: 2px;
+}
+
+.result-link:focus {
+  outline: none;               /* no focus ring */
+}
 
 
 
@@ -817,3 +837,4 @@ if (window.innerWidth > 768) {
   </script>
 </body>
 </html>
+
